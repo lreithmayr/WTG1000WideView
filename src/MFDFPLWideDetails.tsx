@@ -34,6 +34,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
         this.props.focus.set(focus);
     }
 
+
     public render(): VNode {
         return (
             <div class='mfd-dark-background-wide-top'>
@@ -42,9 +43,17 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                         <FPLWideOrigin ref={this.controller.originRef}/>
                         <br/>
                         <div>
-                            <span id="wide-dtk" class="smallText white">DTK</span>
-                            <span id="wide-dis" class="smallText white">DIS</span>
-                            <span id="wide-alt" class="smallText white">ALT</span>
+                            <table>
+                                <tr>
+                                    <td><span id="wide-dtk" className="smallText white">DTK</span></td>
+                                    <td><span id="wide-dis" className="smallText white">DIS</span></td>
+                                    <td><span id="wide-alt" className="smallText white">ALT</span></td>
+                                    <td><span id="wide-fuel-rem" className="smallText white">Fuel REM</span></td>
+                                    <td><span id="wide-ete" className="smallText white">ETE</span></td>
+                                    <td><span id="wide-eta" className="smallText white">ETA</span></td>
+                                    <td><span id="wide-brg" className="smallText white">BRG</span></td>
+                                </tr>
+                            </table>
                         </div>
                         <hr class="mfd-flightplan-wide-hr"/>
                         <div class='mfd-fpln-wide-container' style={"height:200px"} ref={this.fplnContainer}>

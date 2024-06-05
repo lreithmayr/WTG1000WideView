@@ -15,6 +15,7 @@ export class WTG1000WideViewPlugin extends G1000AvionicsPlugin<G1000MfdPluginBin
     public onMenuSystemInitialized(): void {
         this.binder.menuSystem.addMenu('view-opt', new ViewMenu(this.binder.menuSystem, this.controlPublisher, this.binder.viewService));
         this.binder.menuSystem.getMenu('fpln-menu').getItem(4).disabled.set(false);
+        this.binder.menuSystem.getMenu('navmap-root').removeItem(0);
     }
 
     public onViewServiceInitialized(): void {

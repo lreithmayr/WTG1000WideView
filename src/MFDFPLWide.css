@@ -23,9 +23,6 @@
 .mfd-fpl-wide {
     top: 10px;
     height: 280px;
-    border-style: solid;
-    border-color: red;
-    border-width: 2px;
 }
 
 .mfd-fpl-wide .groupbox {
@@ -132,12 +129,14 @@
 }
 
 .mfd-alt-value {
-    padding-left: 8px;
-    text-align: right;
+    position: absolute;
+    left: 305px;
+    text-align: left;
     overflow: hidden;
-    white-space: pre;
+    /*white-space: pre;
     float: right;
     padding-right: 20px;
+     */
     height: 20px;
 }
 
@@ -199,7 +198,7 @@
     width: 45px;
     height: 25px;
     left: 55px;
-    top: 0px;
+    top: 0;
 }
 
 .fpl-hold-distance {
@@ -214,16 +213,46 @@
 #wide-dtk {
     position: absolute;
     left: 170px;
+    color: whitesmoke;
 }
 
 #wide-dis {
     position: absolute;
     left: 250px;
+    color: whitesmoke;
 }
 
 #wide-alt {
     position: absolute;
     left: 320px;
+    color: whitesmoke;
+}
+
+#wide-fuel-rem {
+    position: absolute;
+    left: 420px;
+    color: whitesmoke;
+    width: 0.5em;
+    text-align: center;
+    top: 33px;
+}
+
+#wide-ete {
+    position: absolute;
+    left: 500px;
+    color: whitesmoke;
+}
+
+#wide-eta {
+    position: absolute;
+    left: 570px;
+    color: whitesmoke;
+}
+
+#wide-brg {
+    position: absolute;
+    left: 620px;
+    color: whitesmoke;
 }
 
 .dto-arrow {

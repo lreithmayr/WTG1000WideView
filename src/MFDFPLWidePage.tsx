@@ -45,9 +45,9 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
             dataUpdateFreq: MFDFPLWidePage.UPDATE_FREQ,
 
             rangeEndpoints: {
-                [MapOrientation.NorthUp]: VecNMath.create(4, 0.5, 0.5, 0.5, 0.1),
-                [MapOrientation.HeadingUp]: VecNMath.create(4, 0.5, 0.67, 0.5, 0.16),
-                [MapOrientation.TrackUp]: VecNMath.create(4, 0.5, 0.67, 0.5, 0.16),
+                [MapOrientation.NorthUp]: VecNMath.create(4, 0.5*0.75, 0.5*0.75, 0.5*0.75, 0.1*0.75),
+                [MapOrientation.HeadingUp]: VecNMath.create(4, 0.5*0.75, 0.67*0.75, 0.5*0.75, 0.16*0.75),
+                [MapOrientation.TrackUp]: VecNMath.create(4, 0.5*0.75, 0.67*0.75, 0.5*0.75, 0.16*0.75),
             },
 
             waypointIconImageCache: MapWaypointIconImageCache.getCache(),
@@ -70,6 +70,7 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
             supportFlightPlanFocus: true,
             drawEntirePlan: this.drawEntirePlan,
             nominalFocusMargins: VecNMath.create(4, 40, 40, 40, 40),
+            includeWindVector: true,
 
             ...MapBuilder.ownAirplaneIconOptions(),
 
@@ -90,7 +91,7 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
             trafficSettingManager: TrafficUserSettings.getManager(this.props.bus) as any
         })
         .withProjectedSize(Vec2Math.create(350, 375))
-        //.withDeadZone(VecNMath.create(4, 0, 56, 0, 0))
+        // .withDeadZone(VecNMath.create(4, 0, (736-375), 0, 0))
         .withClockUpdate(MFDFPLWidePage.UPDATE_FREQ)
         .build('mfd-fplmap-wide') as CompiledMapSystem<
             {
