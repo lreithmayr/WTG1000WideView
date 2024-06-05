@@ -1,0 +1,57 @@
+.mfd-fplmap-wide {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 350px;
+  height: 375px;
+  font-size: 16px;
+  font-family: Roboto-Bold;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.mfd-fplmap-wide .map-minicompass {
+  position: absolute;
+  left: 5px;
+  top: 80px;
+}
+
+.mfd-fplmap-wide .map-pointerinfolayer-box {
+  position: absolute;
+  left: 90px;
+  top: 56px;
+}
+
+.mfd-fplmap-wide .map-pointerinfolayer-box-dis {
+  width: 90px;
+}
+
+.mfd-fplmap-wide .map-pointerinfolayer-box-brg {
+  width: 75px;
+}
+
+.mfd-fplmap-wide .map-indicator-group-top-left {
+  position: relative;
+  left: 0px;
+  top: 2px;
+}
+
+.mfd-fplmap-wide .map-indicator-group-bottom-left {
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+}
+
+.mfd-fplmap-wide .map-detail {
+  font-size: 14px;
+}
+
+.mfd-fplmap-wide .map-indicator-group-bottom-right {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+}
+
+.mfd-fplmap-wide .map-indicator-group-center {
+  top: 395px;
+}

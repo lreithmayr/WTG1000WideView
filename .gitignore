@@ -1,0 +1,9 @@
+.rollup.cache
+build/
+dist/
+node_modules/
+npm
+package-lock.json
+tsconfig.json
+WTG1000WideViewPlugin.code-workspace
+.idea/
