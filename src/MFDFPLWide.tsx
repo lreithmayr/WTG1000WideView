@@ -91,21 +91,29 @@ export class MFDFPLWide extends G1000UiControl<MFDFPLWideProps> {
         return (
             <div class='mfd-fpl-wide'>
                 <MFDFPLWideDetails
-                    ref={this.fplDetailsRef} bus={this.props.bus}
-                    viewService={this.props.viewService} fms={this.props.fms}
-                    selection={this.selectionSub} focus={this.props.focus}
+                    ref={this.fplDetailsRef}
+                    bus={this.props.bus}
+                    viewService={this.props.viewService}
+                    fms={this.props.fms}
+                    selection={this.selectionSub}
+                    focus={this.props.focus}
 
                     // Focus the last focused control if scrolling in from the Active VNAV Profile box.
                     getFocusPositionOnScroll={(direction): FocusPosition => direction === 'backward' ? FocusPosition.MostRecent : FocusPosition.First}
                 />
                 <div class='mfd-dark-background-wide-bottom'>
                     <GroupBox title="Active VNV Profile">
-                        <MFDFPLVNavProfile ref={this.vnavProfileRef} bus={this.props.bus}
-                                           flightPlanner={this.props.fms.flightPlanner} fms={this.props.fms}/>
+                        <MFDFPLVNavProfile
+                            ref={this.vnavProfileRef}
+                            bus={this.props.bus}
+                            flightPlanner={this.props.fms.flightPlanner}
+                            fms={this.props.fms}/>
                     </GroupBox>
                     <GroupBox title="Selected Waypoint Weather">
-                        <MFDFPLWeather facLoader={new FacilityLoader(FacilityRepository.getRepository(this.props.bus))}
-                                       fms={this.props.fms} selection={this.selectionSub}/>
+                        <MFDFPLWeather
+                            facLoader={new FacilityLoader(FacilityRepository.getRepository(this.props.bus))}
+                            fms={this.props.fms}
+                            selection={this.selectionSub}/>
                     </GroupBox>
                     <div class="mfd-fpl-wide-bottom-prompt">Press the "FPL" key to view the previous page</div>
                 </div>

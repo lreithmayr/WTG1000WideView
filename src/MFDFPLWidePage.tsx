@@ -1,14 +1,40 @@
 import {
-    CompiledMapSystem, EventBus, FocusPosition, FSComponent, MapIndexedRangeModule, MapSystemBuilder, MathUtils, Subject, Vec2Math, VecNMath, VNode
+    CompiledMapSystem,
+    EventBus,
+    FocusPosition,
+    FSComponent,
+    MapIndexedRangeModule,
+    MapSystemBuilder,
+    MathUtils,
+    Subject,
+    Vec2Math,
+    VecNMath,
+    VNode
 } from '@microsoft/msfs-sdk';
 
 import {
-    Fms, GarminMapKeys, MapFlightPlanFocusModule, MapPointerController, MapPointerInfoLayerSize, MapPointerModule, MapRangeController, TrafficUserSettings, UnitsUserSettings, MapOrientation
+    Fms,
+    GarminMapKeys,
+    MapFlightPlanFocusModule,
+    MapPointerController,
+    MapPointerInfoLayerSize,
+    MapPointerModule,
+    MapRangeController,
+    TrafficUserSettings,
+    UnitsUserSettings,
+    MapOrientation
 } from '@microsoft/msfs-garminsdk';
 
-import { MapBuilder, MapUserSettings, MapWaypointIconImageCache, FmsHEvent, MFDUiPage, MFDUiPageProps } from '@microsoft/msfs-wtg1000';
+import {
+    MapBuilder,
+    MapUserSettings,
+    MapWaypointIconImageCache,
+    FmsHEvent,
+    MFDUiPage,
+    MFDUiPageProps
+} from '@microsoft/msfs-wtg1000';
 
-import { MFDFPLWide } from './MFDFPLWide';
+import {MFDFPLWide} from './MFDFPLWide';
 
 import './MFDFPLWidePage.css';
 
@@ -45,9 +71,9 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
             dataUpdateFreq: MFDFPLWidePage.UPDATE_FREQ,
 
             rangeEndpoints: {
-                [MapOrientation.NorthUp]: VecNMath.create(4, 0.5*0.75, 0.5*0.75, 0.5*0.75, 0.1*0.75),
-                [MapOrientation.HeadingUp]: VecNMath.create(4, 0.5*0.75, 0.67*0.75, 0.5*0.75, 0.16*0.75),
-                [MapOrientation.TrackUp]: VecNMath.create(4, 0.5*0.75, 0.67*0.75, 0.5*0.75, 0.16*0.75),
+                [MapOrientation.NorthUp]: VecNMath.create(4, 0.5 * 0.75, 0.5 * 0.75, 0.5 * 0.75, 0.1 * 0.75),
+                [MapOrientation.HeadingUp]: VecNMath.create(4, 0.5 * 0.75, 0.67 * 0.75, 0.5 * 0.75, 0.16 * 0.75),
+                [MapOrientation.TrackUp]: VecNMath.create(4, 0.5 * 0.75, 0.67 * 0.75, 0.5 * 0.75, 0.16 * 0.75),
             },
 
             waypointIconImageCache: MapWaypointIconImageCache.getCache(),
@@ -94,26 +120,26 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
         // .withDeadZone(VecNMath.create(4, 0, (736-375), 0, 0))
         .withClockUpdate(MFDFPLWidePage.UPDATE_FREQ)
         .build('mfd-fplmap-wide') as CompiledMapSystem<
-            {
-                /** The range module. */
-                [GarminMapKeys.Range]: MapIndexedRangeModule;
+        {
+            /** The range module. */
+            [GarminMapKeys.Range]: MapIndexedRangeModule;
 
-                /** The pointer module. */
-                [GarminMapKeys.Pointer]: MapPointerModule;
+            /** The pointer module. */
+            [GarminMapKeys.Pointer]: MapPointerModule;
 
-                /** The flight plan focus module. */
-                [GarminMapKeys.FlightPlanFocus]: MapFlightPlanFocusModule;
-            },
-            any,
-            {
-                /** The range controller. */
-                [GarminMapKeys.Range]: MapRangeController;
+            /** The flight plan focus module. */
+            [GarminMapKeys.FlightPlanFocus]: MapFlightPlanFocusModule;
+        },
+        any,
+        {
+            /** The range controller. */
+            [GarminMapKeys.Range]: MapRangeController;
 
-                /** The pointer controller. */
-                [GarminMapKeys.Pointer]: MapPointerController;
-            },
-            any
-        >;
+            /** The pointer controller. */
+            [GarminMapKeys.Pointer]: MapPointerController;
+        },
+        any
+    >;
 
     private readonly mapRangeModule = this.compiledMap.context.model.getModule(GarminMapKeys.Range);
     private readonly mapPointerModule = this.compiledMap.context.model.getModule(GarminMapKeys.Pointer);
@@ -138,7 +164,6 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
         //     <MFDFPLWidePage viewService={this.props.viewService} fms={this.props.fms} bus={this.props.bus}
         //                           menuSystem={this.props.menuSystem}/>
         //);
-        console.log('FPLWideView onAfterRender');
     }
 
     /** @inheritdoc */
@@ -243,8 +268,6 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
         this.props.menuSystem.pushMenu('fpln-menu');
         this.compiledMap.ref.instance.wake();
         this.fplRef.instance.onViewOpened();
-
-        console.log("FPL Wide View opened!");
     }
 
     /** @inheritdoc */
@@ -254,14 +277,12 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
         this.mapPointerController.setPointerActive(false);
         this.compiledMap.ref.instance.sleep();
         this.fplRef.instance.onViewClosed();
-        console.log("FPL Wide View closed!");
     }
 
     /** @inheritdoc */
     protected onViewResumed(): void {
         super.onViewResumed();
         this.fplRef.instance.onViewResumed();
-        console.log("FPL Wide View resumed!");
     }
 
     /** @inheritdoc */
@@ -282,7 +303,8 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
     /** @inheritdoc */
     public render(): VNode {
         return (
-            <div ref={this.viewContainerRef} class='mfd-page'>
+            <div ref={this.viewContainerRef}
+                 class='mfd-page'>
                 {this.compiledMap.map}
                 <MFDFPLWide
                     ref={this.fplRef}

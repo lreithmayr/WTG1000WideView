@@ -146,6 +146,15 @@
     top: 8px;
 }
 
+.mfd-fuelrem-value {
+    position: absolute;
+    left: 505px;
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
 .alt-advisory {
     color: whitesmoke;
 }
