@@ -1,5 +1,6 @@
 ## Wide View Plugin for the WorkingTitle G1000 Avionics Package
 
 ### Specifically tailored to the FSR500 by FSReborn.
+###
 
-![img.png](img.png)
+![img_1.png](references/img_1.png)
