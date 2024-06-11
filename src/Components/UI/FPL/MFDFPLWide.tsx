@@ -40,19 +40,19 @@ export interface MFDFPLWideProps extends G1000UiControlProps {
  * The FPL popup container encapsulates the actual popup logic.
  */
 export class MFDFPLWide extends G1000UiControl<MFDFPLWideProps> {
-    private readonly fplDetailsRef = FSComponent.createRef<MFDFPLWideDetails>();
+    private readonly fplWideDetailsRef = FSComponent.createRef<MFDFPLWideDetails>();
     private readonly vnavProfileRef = FSComponent.createRef<MFDFPLVNavProfile>();
 
     private readonly selectionSub = Subject.create<FlightPlanSelection>(null);
 
     /** Called when the view is resumed. */
     public onViewResumed(): void {
-        this.fplDetailsRef.instance.fplViewResumed();
+        this.fplWideDetailsRef.instance.fplViewResumed();
     }
 
     /** Called when the view is opened. */
     public onViewOpened(): void {
-        this.fplDetailsRef.instance.fplViewOpened();
+        this.fplWideDetailsRef.instance.fplViewOpened();
         this.vnavProfileRef.instance.resume();
     }
 
@@ -71,13 +71,13 @@ export class MFDFPLWide extends G1000UiControl<MFDFPLWideProps> {
      * @param focusActiveLeg Whether to focus the active leg.
      */
     public scrollToActiveLeg(focusActiveLeg: boolean): void {
-        this.fplDetailsRef.instance.scrollToActiveLeg(focusActiveLeg);
+        this.fplWideDetailsRef.instance.scrollToActiveLeg(focusActiveLeg);
     }
 
     /** @inheritdoc */
     public onInteractionEvent(evt: FmsHEvent): boolean {
         if (!this.isFocused && evt === FmsHEvent.MENU) {
-            return this.fplDetailsRef.instance.openDetailsMenu();
+            return this.fplWideDetailsRef.instance.openDetailsMenu();
         }
 
         return super.onInteractionEvent(evt);
@@ -91,7 +91,7 @@ export class MFDFPLWide extends G1000UiControl<MFDFPLWideProps> {
         return (
             <div class='mfd-fpl-wide'>
                 <MFDFPLWideDetails
-                    ref={this.fplDetailsRef}
+                    ref={this.fplWideDetailsRef}
                     bus={this.props.bus}
                     viewService={this.props.viewService}
                     fms={this.props.fms}

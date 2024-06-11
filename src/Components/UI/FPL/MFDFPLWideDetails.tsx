@@ -1,30 +1,44 @@
+/// <reference types="@microsoft/msfs-types/js/avionics" />
+
 import {
     BlurReconciliation,
+    EventBus,
     FlightPlanSegment,
     FlightPlanSegmentType,
-    FSComponent, Subject,
+    FSComponent,
+    Subject,
     VNode
 } from '@microsoft/msfs-sdk';
 import {
-    G1000ControlList,
-    ScrollBar,
-    FplActiveLegArrow,
-    GroupBox,
-    FlightPlanSelection,
     FlightPlanFocus,
-    FPLDetailProps,
+    FlightPlanSelection,
+    FplActiveLegArrow,
     FPLDetails,
     FPLSection,
-    FPLDeparture,
-    FPLDestination,
-    FPLApproach,
-    FPLArrival,
-    FPLEnroute
+    G1000ControlList,
+    G1000UiControlProps,
+    GroupBox,
+    ScrollBar,
+    ViewService
 } from '@microsoft/msfs-wtg1000';
 import {FPLWideOrigin} from './FPLWideSectionOrigin';
+import {FPLWideApproach} from "./FPLSectionApproach";
+import {FPLWideArrival} from "./FPLSectionArrival";
+import {FPLWideDeparture} from "./FPLSectionDeparture";
+import {FPLWideDestination} from "./FPLSectionDestination";
+import {FPLWideEnroute} from "./FPLSectionEnroute";
+import {Fms} from '@microsoft/msfs-garminsdk';
 
-/** Component props for MFDFPLDetails */
-export interface MFDFPLWideDetailProps extends FPLDetailProps {
+export interface MFDFPLWideDetailProps extends G1000UiControlProps {
+    /** The event bus for flight plan events. */
+    bus: EventBus;
+
+    /** The view service. */
+    viewService: ViewService;
+
+    /** An FMS state manager. */
+    fms: Fms;
+
     /** A subject to provide the selected flight plan element. */
     selection: Subject<FlightPlanSelection>;
 
@@ -32,17 +46,17 @@ export interface MFDFPLWideDetailProps extends FPLDetailProps {
     focus: Subject<FlightPlanFocus>;
 }
 
+/** Component props for MFDFPLDetails */
 export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
-    public isExtendedView = true;
+    protected isExtendedView = true;
 
-    public onAfterRender(thisNode: VNode) {
-        super.onAfterRender(thisNode);
+    constructor(props: MFDFPLWideDetailProps) {
+        super(props);
     }
 
     /** Called when the fpl view is opened. */
     public fplViewOpened(): void {
         super.fplViewOpened(false);
-
         this.controller.legArrowRef.instance.updateArrows(this.store.activeLegState.get(), this.store.activeLeg.get(), this.props.fms.getFlightPlan());
     }
 
@@ -56,22 +70,14 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
         this.props.focus.set(focus);
     }
 
-    /**
-     * Renders a section in the flight plan.
-     * @param data The data object for this section.
-     * @param index The index.
-     * @returns The rendered VNode.
-     */
-    protected renderItem(data: FlightPlanSegment, index: number): VNode {
+    protected override renderItem(data: FlightPlanSegment, index: number): VNode {
         let section;
-        const ref = FSComponent.createRef<FPLSection>();
-        // select datatemplate
+        console.log("From own renderItem()");
+        const ref = FSComponent.createRef<FPLSection>()
         switch (data.segmentType) {
             case FlightPlanSegmentType.Departure:
-                console.log(`Rendering ${data.segmentType.toString()}!`);
-                console.log(`No of legs: ${data.legs.length}`)
                 section = (
-                    <FPLDeparture
+                    <FPLWideDeparture
                         ref={ref}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
@@ -89,10 +95,8 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 );
                 break;
             case FlightPlanSegmentType.Arrival:
-                console.log(`Rendering ${data.segmentType.toString()}!`);
-                console.log(`No of legs: ${data.legs.length}`)
                 section = (
-                    <FPLArrival
+                    <FPLWideArrival
                         ref={ref}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
@@ -110,10 +114,8 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 );
                 break;
             case FlightPlanSegmentType.Approach:
-                console.log(`Rendering ${data.segmentType.toString()}!`);
-                console.log(`No of legs: ${data.legs.length}`)
                 section = (
-                    <FPLApproach
+                    <FPLWideApproach
                         ref={ref}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
@@ -131,10 +133,8 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 );
                 break;
             case FlightPlanSegmentType.Destination:
-                console.log(`Rendering ${data.segmentType.toString()}!`);
-                console.log(`No of legs: ${data.legs.length}`)
                 section = (
-                    <FPLDestination
+                    <FPLWideDestination
                         ref={ref}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
@@ -150,12 +150,10 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                         requireChildFocus
                     />
                 );
-                console.log(`Legs ${section.legs}`);
                 break;
             default:
-                console.log(`Rendering ${data.segmentType.toString()}!`);
                 section = (
-                    <FPLEnroute
+                    <FPLWideEnroute
                         ref={ref}
                         viewService={this.props.viewService}
                         fms={this.props.fms}

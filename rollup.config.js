@@ -10,7 +10,7 @@ export default {
     name: 'wtg100WideView',
     globals: {
       '@microsoft/msfs-sdk': 'msfssdk',
-      '@microsoft/msfs-wtg1000': 'g1000nximfd',
+      '@microsoft/msfs-wtg1000': '(window.g1000nxipfd || window.g1000nximfd) || {}',
       '@microsoft/msfs-garminsdk': 'garminsdk'
     }
   },

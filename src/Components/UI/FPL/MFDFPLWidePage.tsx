@@ -160,10 +160,6 @@ export class MFDFPLWidePage extends MFDUiPage<MFDFPLWidePageProps> {
     public onAfterRender(thisNode: VNode): void {
         super.onAfterRender(thisNode);
         this.compiledMap.ref.instance.sleep();
-        //this.props.viewService.registerView('FPLPage', () =>
-        //     <MFDFPLWidePage viewService={this.props.viewService} fms={this.props.fms} bus={this.props.bus}
-        //                           menuSystem={this.props.menuSystem}/>
-        //);
     }
 
     /** @inheritdoc */
