@@ -148,7 +148,7 @@
 
 .mfd-fuelrem-value {
     position: absolute;
-    left: 505px;
+    left: 405px;
     width: 80px;
     text-align: right;
     overflow: hidden;
@@ -225,10 +225,13 @@
     color: whitesmoke;
 }
 
-#wide-dis {
+#wide-cum-dis {
     position: absolute;
     left: 250px;
     color: whitesmoke;
+    width: 0.5em;
+    text-align: center;
+    top: 33px;
 }
 
 #wide-alt {

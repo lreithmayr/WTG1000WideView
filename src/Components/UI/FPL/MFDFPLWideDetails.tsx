@@ -73,12 +73,13 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
     protected override renderItem(data: FlightPlanSegment, index: number): VNode {
         let section;
         console.log("From own renderItem()");
-        const ref = FSComponent.createRef<FPLSection>()
+        const fplSectionRef = FSComponent.createRef<FPLSection>()
         switch (data.segmentType) {
             case FlightPlanSegmentType.Departure:
                 section = (
                     <FPLWideDeparture
-                        ref={ref}
+                        ref={fplSectionRef}
+                        bus={this.props.bus}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -97,7 +98,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
             case FlightPlanSegmentType.Arrival:
                 section = (
                     <FPLWideArrival
-                        ref={ref}
+                        ref={fplSectionRef}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -116,7 +117,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
             case FlightPlanSegmentType.Approach:
                 section = (
                     <FPLWideApproach
-                        ref={ref}
+                        ref={fplSectionRef}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -135,7 +136,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
             case FlightPlanSegmentType.Destination:
                 section = (
                     <FPLWideDestination
-                        ref={ref}
+                        ref={fplSectionRef}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -154,7 +155,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
             default:
                 section = (
                     <FPLWideEnroute
-                        ref={ref}
+                        ref={fplSectionRef}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -193,8 +194,8 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                                 <tr>
                                     <td><span id="wide-dtk"
                                               className="smallText white">DTK</span></td>
-                                    <td><span id="wide-dis"
-                                              className="smallText white">DIS</span></td>
+                                    <td><span id="wide-cum-dis"
+                                              className="smallText white">CUM DIS</span></td>
                                     <td><span id="wide-alt"
                                               className="smallText white">ALT</span></td>
                                     <td><span id="wide-fuel-rem"
