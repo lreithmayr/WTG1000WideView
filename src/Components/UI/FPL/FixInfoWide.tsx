@@ -1,15 +1,18 @@
 import {
     BitFlags,
     ComputedSubject,
+    ConsumerSubject,
     EventBus,
     FacilityType,
     FixTypeFlags,
     FlightPlanSegmentType,
     FlightPlanUtils,
     FSComponent,
+    GNSSEvents,
     ICAO,
     LegDefinitionFlags,
     LegType,
+    MappedSubject,
     Subject,
     UnitType,
     VNode
@@ -74,8 +77,28 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
     private readonly hasInvalidAltitude = Subject.create<boolean>(false);
     private readonly isAltitudeHidden = Subject.create<boolean>(false);
 
-    private fuelRemLBS: number = 0.0;
-    private fuelFlowPPH: number = 0.0;
+    private readonly gsKTS = ConsumerSubject.create(this.props.bus.getSubscriber<GNSSEvents>().on('ground_speed'), 0);
+    private readonly distToFixNM = Subject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistanceWithTransitions ?? -1);
+    private readonly fuelFlowPPH = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1'), 0);
+    private readonly totalFuelLBS = ConsumerSubject.create(this.props.bus.getSubscriber<FuelTotalizerSimVars>().on('remainingFuel'), 0);
+
+    private _fuelRemLBS = MappedSubject.create(
+        ([gsKTS, distToFixNM, fuelFlowPPH, totalFuelLBS]): string => {
+            if (this.props.data.get().legIsBehind) {
+                return '_____';
+            }
+            else if (distToFixNM >= 0 && gsKTS > 30 && fuelFlowPPH > 0) {
+                let fuelRemaining = totalFuelLBS - (distToFixNM / gsKTS) * fuelFlowPPH;
+                return Math.round(fuelRemaining).toFixed(0);
+            } else {
+                return '_____';
+            }
+        },
+        this.gsKTS,
+        this.distToFixNM,
+        this.fuelFlowPPH,
+        this.totalFuelLBS
+    );
 
     private _dtk = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.initialDtk ?? -1, (v): string => {
         if (v < 0 || this.props.data.get().legIsBehind) {
@@ -86,15 +109,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         }
     });
 
-    // noinspection JSUnusedLocalSymbols
-    private _distance = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.distance ?? -1, (v): string => {
-        if (v < 0.1 || this.props.data.get().legIsBehind) {
-            return '____';
-        } else {
-            const dis = UnitType.METER.convertTo(v, UnitType.NMILE);
-            return dis.toFixed((dis < 100) ? 1 : 0);
-        }
-    });
 
     private _cumDistance = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistance ?? -1, (v): string => {
         if (v < 0.1 || this.props.data.get().legIsBehind) {
@@ -133,22 +147,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 return '';
         }
     });
-
-    private _fuelRemSub = this.props.bus.getSubscriber<FuelTotalizerSimVars>().on('remainingFuel').whenChangedBy(1.0).handle(v => {
-        this.fuelRemLBS = Math.round(UnitType.GALLON_FUEL.convertTo(v, UnitType.POUND));
-        console.log(`Fuel REM in LBS: ${this.fuelRemLBS}`);
-    });
-
-    private _fuelFlow1Sub = this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1').whenChangedBy(1.0).handle(v => {
-        this.fuelFlowPPH = Math.round(UnitType.GPH_FUEL.convertTo(v, UnitType.PPH));
-        console.log(`Fuel Flow 1: ${this.fuelFlowPPH}`);
-    });
-
-    private calculateEndurance(fuelRemaining: number, fuelFlow: number) {
-        let enduranceHours: number = fuelRemaining / fuelFlow;
-        console.log(`Endurance [h]: ${enduranceHours}`);
-    }
-
     /**
      * Sets the leg distance.
      * @param leg The FixLegInfo Object
@@ -276,8 +274,8 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                     this.hasInvalidAltitude.set(false);
                 }
             }
+            this._fuelRemLBS.resume();
         });
-        this.calculateEndurance(this.fuelRemLBS, this.fuelFlowPPH);
     }
 
     /** @inheritdoc */
@@ -359,8 +357,8 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                                         isInvalid={this.hasInvalidAltitude}/>
                 </div>
                 <div class='mfd-fuelrem-value'>
-                    {this.fuelRemLBS.toString()}
-                    <span className="smallText">
+                    {this._fuelRemLBS}
+                    <span class="smallText">
                         LB
                     </span>
                 </div>
