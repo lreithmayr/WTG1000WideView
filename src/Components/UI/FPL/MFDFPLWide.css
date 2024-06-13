@@ -130,7 +130,7 @@
 
 .mfd-alt-value {
     position: absolute;
-    left: 305px;
+    left: 290px;
     text-align: left;
     overflow: hidden;
     /*white-space: pre;
@@ -148,7 +148,25 @@
 
 .mfd-fuelrem-value {
     position: absolute;
-    left: 405px;
+    left: 390px;
+    width: 100px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-ete-value {
+    position: absolute;
+    left: 490px;
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-eta-value {
+    position: absolute;
+    left: 580px;
     width: 80px;
     text-align: right;
     overflow: hidden;
@@ -242,28 +260,31 @@
 
 #wide-fuel-rem {
     position: absolute;
-    left: 420px;
+    left: 430px;
     color: whitesmoke;
     width: 0.5em;
     text-align: center;
     top: 33px;
 }
 
-#wide-ete {
+#wide-cum-ete {
     position: absolute;
-    left: 500px;
+    left: 530px;
     color: whitesmoke;
+    width: 0.5em;
+    text-align: center;
+    top: 33px;
 }
 
 #wide-eta {
     position: absolute;
-    left: 570px;
+    left: 610px;
     color: whitesmoke;
 }
 
 #wide-brg {
     position: absolute;
-    left: 620px;
+    left: 660px;
     color: whitesmoke;
 }
 

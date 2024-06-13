@@ -200,8 +200,8 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                                               className="smallText white">ALT</span></td>
                                     <td><span id="wide-fuel-rem"
                                               className="smallText white">Fuel REM</span></td>
-                                    <td><span id="wide-ete"
-                                              className="smallText white">ETE</span></td>
+                                    <td><span id="wide-cum-ete"
+                                              className="smallText white">CUM ETE</span></td>
                                     <td><span id="wide-eta"
                                               className="smallText white">ETA</span></td>
                                     <td><span id="wide-brg"

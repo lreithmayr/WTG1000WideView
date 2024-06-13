@@ -1,5 +1,6 @@
 import {
     BitFlags,
+    ClockEvents,
     ComputedSubject,
     ConsumerSubject,
     EventBus,
@@ -25,6 +26,8 @@ import {
     FuelTotalizerSimVars,
     G1000UiControl,
     G1000UiControlProps,
+    TimeDisplay,
+    TimeDisplayFormat,
     UiControl,
     ViewService
 } from '@microsoft/msfs-wtg1000';
@@ -71,33 +74,79 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
     private readonly fixElementRef = FSComponent.createRef<HTMLDivElement>();
     private readonly highlightElementRef = FSComponent.createRef<HTMLSpanElement>();
     private readonly altitudeRef = FSComponent.createRef<HTMLDivElement>();
+    private readonly etaRef = FSComponent.createRef<TimeDisplay>();
     private readonly ACTIVE_WPT_CLASS = 'active-wpt';
 
     private readonly isUserConstraint = Subject.create<boolean>(false);
     private readonly hasInvalidAltitude = Subject.create<boolean>(false);
     private readonly isAltitudeHidden = Subject.create<boolean>(false);
 
-    private readonly gsKTS = ConsumerSubject.create(this.props.bus.getSubscriber<GNSSEvents>().on('ground_speed'), 0);
-    private readonly distToFixNM = Subject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistanceWithTransitions ?? -1);
-    private readonly fuelFlowPPH = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1'), 0);
-    private readonly totalFuelLBS = ConsumerSubject.create(this.props.bus.getSubscriber<FuelTotalizerSimVars>().on('remainingFuel'), 0);
+    private readonly gsKTS = ConsumerSubject.create(this.props.bus.getSubscriber<GNSSEvents>().on('ground_speed').whenChangedBy(1.0), 0);
+    private readonly distToFixMETERS = Subject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistance ?? -1);
+    private readonly fuelFlowGPH = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1').whenChangedBy(1.0), 0);
+    private readonly totalFuelGAL = ConsumerSubject.create(this.props.bus.getSubscriber<FuelTotalizerSimVars>().on('remainingFuel').whenChangedBy(1.0), 0);
+    private readonly simTime = ConsumerSubject.create(this.props.bus.getSubscriber<ClockEvents>().on('simTime').whenChangedBy(1000), 0);
+
+    private eta: number = 0;
 
     private _fuelRemLBS = MappedSubject.create(
-        ([gsKTS, distToFixNM, fuelFlowPPH, totalFuelLBS]): string => {
+        ([gsKTS, distToFixMETERS, fuelFlowGPH, totalFuelGAL]): string => {
+            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
             if (this.props.data.get().legIsBehind) {
                 return '_____';
-            }
-            else if (distToFixNM >= 0 && gsKTS > 30 && fuelFlowPPH > 0) {
-                let fuelRemaining = totalFuelLBS - (distToFixNM / gsKTS) * fuelFlowPPH;
-                return Math.round(fuelRemaining).toFixed(0);
+            } else if (distToFixNM >= 0 && gsKTS > 30 && fuelFlowGPH > 0) {
+                const fuelRemaining = totalFuelGAL - (distToFixNM / gsKTS) * fuelFlowGPH;
+                return Math.round(UnitType.GALLON_FUEL.convertTo(fuelRemaining, UnitType.POUND)).toFixed(0);
             } else {
                 return '_____';
             }
         },
         this.gsKTS,
-        this.distToFixNM,
-        this.fuelFlowPPH,
-        this.totalFuelLBS
+        this.distToFixMETERS,
+        this.fuelFlowGPH,
+        this.totalFuelGAL
+    );
+
+    // FIXME: Still a bug when going from 2:00 to 1:59
+    private _enduranceHRS = this._fuelRemLBS.map((fuelVal): string => {
+            if (fuelVal != '_____') {
+                let fuelRem: number = +fuelVal;
+                let end = fuelRem / UnitType.GPH_FUEL.convertTo(this.fuelFlowGPH.get(), UnitType.PPH)
+                let endMINS = ((end % 1) * 60).toFixed(0).padStart(2, '0');
+                let endHRS = end.toFixed(0);
+                return endHRS + '+' + endMINS;
+            } else {
+                return '_____';
+            }
+        }
+    );
+
+    private _ete = MappedSubject.create(
+        ([gsKTS, distToFixMETERS]): string => {
+            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
+            if (this.props.data.get().legIsBehind) {
+                return '_____';
+            } else if (distToFixNM >= 0 && gsKTS > 30) {
+                let eteHRS = distToFixNM / gsKTS;
+                return eteHRS.toFixed(0).padStart(2, '0') + ':' + ((eteHRS % 1) * 60).toFixed(0).padStart(2, '0');
+            } else {
+                return '_____';
+            }
+        },
+        this.gsKTS,
+        this.distToFixMETERS,
+    );
+
+    private _eta = MappedSubject.create(
+        ([gsKTS, distToFixMETERS, simTime]) => {
+            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
+            if (distToFixNM >= 0 && gsKTS > 30) {
+                this.eta = UnitType.HOUR.convertTo(distToFixNM / gsKTS, UnitType.MILLISECOND) + simTime;
+            }
+        },
+        this.gsKTS,
+        this.distToFixMETERS,
+        this.simTime
     );
 
     private _dtk = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.initialDtk ?? -1, (v): string => {
@@ -147,6 +196,7 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 return '';
         }
     });
+
     /**
      * Sets the leg distance.
      * @param leg The FixLegInfo Object
@@ -191,6 +241,8 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
     /** @inheritdoc */
     public onAfterRender(node: VNode): void {
         super.onAfterRender(node);
+
+        console.log("onAfterRender called from FixInfoWide");
 
         this.props.data.sub((v) => {
             if (v.isActive) {
@@ -274,7 +326,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                     this.hasInvalidAltitude.set(false);
                 }
             }
-            this._fuelRemLBS.resume();
         });
     }
 
@@ -327,6 +378,17 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         this.highlightElementRef.instance.classList.remove(UiControl.FOCUS_CLASS);
     }
 
+    protected renderETA(): VNode {
+        return (
+            <TimeDisplay
+                ref={this.etaRef}
+                time={this.eta}
+                format={TimeDisplayFormat.UTC}
+                localOffset={0}
+            />
+        );
+    }
+
     /** @inheritdoc */
     render(): VNode {
         return (
@@ -335,7 +397,7 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 <G1000UiControl onFocused={this.onNameFocused.bind(this)}
                                 onBlurred={this.onNameBlurred.bind(this)}>
                     <div class='fix-name'>
-                        <span ref={this.highlightElementRef}>{this.props.data.get().legDefinition.name}<span class='fix-type'>{this._fixType}</span></span>
+                        <span ref={this.highlightElementRef}>{this.props.data.get().legDefinition.name}<span className='fix-type'>{this._fixType}</span></span>
                     </div>
                 </G1000UiControl>
                 <div class='mfd-dtk-value'>
@@ -359,8 +421,15 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 <div class='mfd-fuelrem-value'>
                     {this._fuelRemLBS}
                     <span class="smallText">
-                        LB
+                        LB/
                     </span>
+                    {this._enduranceHRS}
+                </div>
+                <div class='mfd-ete-value'>
+                    {this._ete}
+                </div>
+                <div class='mfd-eta-value'>
+                    {this.renderETA()}
                 </div>
             </div>
         );
