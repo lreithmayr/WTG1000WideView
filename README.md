@@ -3,4 +3,4 @@
 ### Specifically tailored to the FSR500 by FSReborn.
 ###
 
-![img_1.png](references/img_1.png)
+![img.png](references/img.png)
