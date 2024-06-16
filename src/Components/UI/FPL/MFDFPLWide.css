@@ -114,65 +114,6 @@
     color: cyan;
 }
 
-.mfd-dtk-value {
-    width: 40px;
-    text-align: right;
-    overflow: hidden;
-    color: whitesmoke;
-}
-
-.mfd-dis-value {
-    width: 80px;
-    text-align: right;
-    overflow: hidden;
-    color: whitesmoke;
-}
-
-.mfd-alt-value {
-    position: absolute;
-    left: 290px;
-    text-align: left;
-    overflow: hidden;
-    /*white-space: pre;
-    float: right;
-    padding-right: 20px;
-     */
-    height: 20px;
-}
-
-.mfd-alt-value svg {
-    position: absolute;
-    right: -26px;
-    top: 8px;
-}
-
-.mfd-fuelrem-value {
-    position: absolute;
-    left: 390px;
-    width: 100px;
-    text-align: right;
-    overflow: hidden;
-    color: whitesmoke;
-}
-
-.mfd-ete-value {
-    position: absolute;
-    left: 490px;
-    width: 80px;
-    text-align: right;
-    overflow: hidden;
-    color: whitesmoke;
-}
-
-.mfd-eta-value {
-    position: absolute;
-    left: 580px;
-    width: 80px;
-    text-align: right;
-    overflow: hidden;
-    color: whitesmoke;
-}
-
 .alt-advisory {
     color: whitesmoke;
 }
@@ -237,15 +178,87 @@
     color: cyan;
 }
 
+.mfd-dtk-value {
+    position: absolute;
+    left: 140px;
+    width: 40px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-dis-value {
+    position: absolute;
+    left: 210px;
+    width: 80px;
+    text-align: left;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-alt-value {
+    position: absolute;
+    left: 275px;
+    text-align: left;
+    overflow: hidden;
+    /*white-space: pre;
+    float: right;
+    padding-right: 20px;
+     */
+    height: 20px;
+}
+
+.mfd-alt-value svg {
+    position: absolute;
+    right: -26px;
+    top: 8px;
+}
+
+.mfd-fuelrem-value {
+    position: absolute;
+    left: 380px;
+    width: 100px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-ete-value {
+    position: absolute;
+    left: 470px;
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-eta-value {
+    position: absolute;
+    left: 560px;
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
+.mfd-brg-value {
+    position: absolute;
+    left: 620px;
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+    color: whitesmoke;
+}
+
 #wide-dtk {
     position: absolute;
-    left: 170px;
+    left: 145px;
     color: whitesmoke;
 }
 
 #wide-cum-dis {
     position: absolute;
-    left: 250px;
+    left: 220px;
     color: whitesmoke;
     width: 0.5em;
     text-align: center;
@@ -254,13 +267,13 @@
 
 #wide-alt {
     position: absolute;
-    left: 320px;
+    left: 300px;
     color: whitesmoke;
 }
 
 #wide-fuel-rem {
     position: absolute;
-    left: 430px;
+    left: 410px;
     color: whitesmoke;
     width: 0.5em;
     text-align: center;
@@ -269,7 +282,7 @@
 
 #wide-cum-ete {
     position: absolute;
-    left: 530px;
+    left: 510px;
     color: whitesmoke;
     width: 0.5em;
     text-align: center;
@@ -278,7 +291,7 @@
 
 #wide-eta {
     position: absolute;
-    left: 610px;
+    left: 590px;
     color: whitesmoke;
 }
 

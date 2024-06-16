@@ -162,7 +162,9 @@ export class FPLWideDeparture<P extends FPLWideSectionProps = FPLWideSectionProp
                             onAltitudeChanged={(alt: number): void => this._onAltitudeSet(this.listRef.instance.getSelectedIndex(), alt)}
                             onAltitudeRemoved={(): void => this._onAltitudeRemoved(this.listRef.instance.getSelectedIndex())}
                             getActiveLegDistance={(): number => this.getActiveLegDistance()}
-                            getActiveLegDtk={(): number => this.getActiveLegDtk()}/>;
+                            getActiveLegDtk={(): number => this.getActiveLegDtk()}
+                            getActiveLegIndex={(): number => this.getActiveLegIndex()}
+        />
     };
 
     /**

@@ -13,6 +13,7 @@ import {
     ICAO,
     LegDefinitionFlags,
     LegType,
+    LNavDataEvents,
     MappedSubject,
     Subject,
     UnitType,
@@ -23,11 +24,8 @@ import {
     ConstraintSelector,
     FixLegInfo,
     FuelSimVars,
-    FuelTotalizerSimVars,
     G1000UiControl,
     G1000UiControlProps,
-    TimeDisplay,
-    TimeDisplayFormat,
     UiControl,
     ViewService
 } from '@microsoft/msfs-wtg1000';
@@ -63,36 +61,60 @@ interface FixInfoWideProps extends G1000UiControlProps {
 
     /** A callback called to get the active leg desired track. */
     getActiveLegDtk: () => number;
+
+    getActiveLegIndex: () => number;
 }
+
+// let DEBUG: boolean = false;
 
 // noinspection JSUnusedGlobalSymbols
 /** The FixInfo component. */
 export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
-
     private static viewableLegTypes = [LegType.AF, LegType.CF, LegType.DF, LegType.IF, LegType.RF, LegType.TF];
 
     private readonly fixElementRef = FSComponent.createRef<HTMLDivElement>();
     private readonly highlightElementRef = FSComponent.createRef<HTMLSpanElement>();
     private readonly altitudeRef = FSComponent.createRef<HTMLDivElement>();
-    private readonly etaRef = FSComponent.createRef<TimeDisplay>();
     private readonly ACTIVE_WPT_CLASS = 'active-wpt';
 
     private readonly isUserConstraint = Subject.create<boolean>(false);
     private readonly hasInvalidAltitude = Subject.create<boolean>(false);
     private readonly isAltitudeHidden = Subject.create<boolean>(false);
 
-    private readonly gsKTS = ConsumerSubject.create(this.props.bus.getSubscriber<GNSSEvents>().on('ground_speed').whenChangedBy(1.0), 0);
-    private readonly distToFixMETERS = Subject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistance ?? -1);
-    private readonly fuelFlowGPH = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1').whenChangedBy(1.0), 0);
-    private readonly totalFuelGAL = ConsumerSubject.create(this.props.bus.getSubscriber<FuelTotalizerSimVars>().on('remainingFuel').whenChangedBy(1.0), 0);
-    private readonly simTime = ConsumerSubject.create(this.props.bus.getSubscriber<ClockEvents>().on('simTime').whenChangedBy(1000), 0);
+    private readonly gsKTS = ConsumerSubject.create(this.props.bus.getSubscriber<GNSSEvents>().on('ground_speed'), 0);
+    private readonly fuelFlowGPH = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelFlow1'), 0);
+    private readonly totalFuelGAL = ConsumerSubject.create(this.props.bus.getSubscriber<FuelSimVars>().on('fuelQty'), 0);
+    private readonly simTime = ConsumerSubject.create(this.props.bus.getSubscriber<ClockEvents>().on('simTime'), 0);
+    private readonly activeLegBearing = ConsumerSubject.create(this.props.bus.getSubscriber<LNavDataEvents>().on('lnavdata_dtk_mag'), 0);
+    private readonly currentLNavWpt = ConsumerSubject.create(this.props.bus.getSubscriber<LNavDataEvents>().on('lnavdata_waypoint_ident'), null)
 
-    private eta: number = 0;
+    private _cumulativeDistance = MappedSubject.create(
+        ([leg, currentLNavWpt]): string => {
+            if (leg.legIsBehind) {
+                return '____';
+            } else {
+                if (leg.isActive || leg.legDefinition.name === currentLNavWpt) {
+                    window.legCumulativeDist = UnitType.METER.convertTo(this.props.getActiveLegDistance(), UnitType.NMILE);
+                } else if (leg.isAirwayExitFix && leg.isCollapsed) {
+                    window.legCumulativeDist += UnitType.METER.convertTo(leg.airwayDistance ?? -1, UnitType.NMILE);
+                } else if (leg.legDefinition.leg.type === LegType.HF || leg.legDefinition.leg.type === LegType.HM || leg.legDefinition.leg.type === LegType.HA) {
+                    const lastVectorIndex = leg.legDefinition.calculated?.flightPath.length ? leg.legDefinition.calculated?.flightPath.length - 1 : 0;
+                    window.legCumulativeDist += leg.legDefinition.calculated?.flightPath[lastVectorIndex].distance ?? 0;
+                } else {
+                    window.legCumulativeDist += UnitType.METER.convertTo((leg.legDefinition.calculated?.distance ?? -1), UnitType.NMILE);
+                }
+                return window.legCumulativeDist.toFixed((window.legCumulativeDist < 100) ? 1 : 0);
+            }
+        },
+        this.props.data,
+        this.currentLNavWpt
+    );
+
 
     private _fuelRemLBS = MappedSubject.create(
-        ([gsKTS, distToFixMETERS, fuelFlowGPH, totalFuelGAL]): string => {
-            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
-            if (this.props.data.get().legIsBehind) {
+        ([gsKTS, fuelFlowGPH, totalFuelGAL, dist]): string => {
+            let distToFixNM = (dist !== '____') ? Number(dist) : -1;
+            if (distToFixNM === -1 || this.props.data.get().legIsBehind) {
                 return '_____';
             } else if (distToFixNM >= 0 && gsKTS > 30 && fuelFlowGPH > 0) {
                 const fuelRemaining = totalFuelGAL - (distToFixNM / gsKTS) * fuelFlowGPH;
@@ -102,18 +124,17 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
             }
         },
         this.gsKTS,
-        this.distToFixMETERS,
         this.fuelFlowGPH,
-        this.totalFuelGAL
+        this.totalFuelGAL,
+        this._cumulativeDistance
     );
 
-    // FIXME: Still a bug when going from 2:00 to 1:59
     private _enduranceHRS = this._fuelRemLBS.map((fuelVal): string => {
             if (fuelVal != '_____') {
                 let fuelRem: number = +fuelVal;
                 let end = fuelRem / UnitType.GPH_FUEL.convertTo(this.fuelFlowGPH.get(), UnitType.PPH)
                 let endMINS = ((end % 1) * 60).toFixed(0).padStart(2, '0');
-                let endHRS = end.toFixed(0);
+                let endHRS = end.toString().split('.')[0];
                 return endHRS + '+' + endMINS;
             } else {
                 return '_____';
@@ -122,31 +143,55 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
     );
 
     private _ete = MappedSubject.create(
-        ([gsKTS, distToFixMETERS]): string => {
-            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
-            if (this.props.data.get().legIsBehind) {
+        ([gsKTS, dist]): string => {
+            let distToFixNM = (dist !== '____') ? Number(dist) : -1;
+            if (distToFixNM === -1 || this.props.data.get().legIsBehind) {
                 return '_____';
             } else if (distToFixNM >= 0 && gsKTS > 30) {
-                let eteHRS = distToFixNM / gsKTS;
-                return eteHRS.toFixed(0).padStart(2, '0') + ':' + ((eteHRS % 1) * 60).toFixed(0).padStart(2, '0');
+                let eteHRSDecimal = distToFixNM / gsKTS;
+                eteHRSDecimal = Number(eteHRSDecimal.toPrecision(4))
+                let hrs = Math.floor(eteHRSDecimal)
+                let mins = (eteHRSDecimal % 1) * 60;
+                let secs = (mins % 1) * 60;
+                if (eteHRSDecimal < 1) {
+                    return (Math.floor(mins).toString().padStart(2, '0') + ":" + Math.round(secs).toString().padStart(2, '0'));
+                } else {
+                    return (Math.floor(hrs).toString().padStart(2, '0') + "+" + Math.round(mins).toString().padStart(2, '0'));
+                }
             } else {
                 return '_____';
             }
         },
         this.gsKTS,
-        this.distToFixMETERS,
+        this._cumulativeDistance
     );
 
     private _eta = MappedSubject.create(
-        ([gsKTS, distToFixMETERS, simTime]) => {
-            const distToFixNM = UnitType.METER.convertTo(distToFixMETERS, UnitType.NMILE);
-            if (distToFixNM >= 0 && gsKTS > 30) {
-                this.eta = UnitType.HOUR.convertTo(distToFixNM / gsKTS, UnitType.MILLISECOND) + simTime;
+        ([gsKTS, simTime, dist]) => {
+            let distToFixNM = (dist !== '____') ? Number(dist) : -1;
+            if (distToFixNM === -1 || this.props.data.get().legIsBehind) {
+                return '_____';
+            } else if (distToFixNM >= 0 && gsKTS > 30) {
+                let eta = UnitType.HOUR.convertTo(distToFixNM / gsKTS, UnitType.MILLISECOND) + simTime;
+                const date = new Date(eta);
+                return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+            } else {
+                return '_____';
             }
         },
         this.gsKTS,
-        this.distToFixMETERS,
-        this.simTime
+        this.simTime,
+        this._cumulativeDistance
+    );
+
+    private _brg = ComputedSubject.create(this.activeLegBearing.get() ?? -1, (v): string => {
+            if (v < 0) {
+                return '___';
+            } else {
+                const rounded = Math.round(v);
+                return (rounded === 0 ? 360 : rounded).toFixed(0).padStart(3, '0');
+            }
+        }
     );
 
     private _dtk = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.initialDtk ?? -1, (v): string => {
@@ -155,16 +200,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         } else {
             const rounded = Math.round(v);
             return (rounded === 0 ? 360 : rounded).toFixed(0).padStart(3, '0');
-        }
-    });
-
-
-    private _cumDistance = ComputedSubject.create(this.props.data.get().legDefinition.calculated?.cumulativeDistance ?? -1, (v): string => {
-        if (v < 0.1 || this.props.data.get().legIsBehind) {
-            return '____';
-        } else {
-            const dis = UnitType.METER.convertTo(v, UnitType.NMILE);
-            return dis.toFixed((dis < 100) ? 1 : 0);
         }
     });
 
@@ -197,22 +232,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         }
     });
 
-    /**
-     * Sets the leg distance.
-     * @param leg The FixLegInfo Object
-     */
-    private setDistance(leg: FixLegInfo): void {
-        if (leg.isActive) {
-            this._cumDistance.set(this.props.getActiveLegDistance());
-        } else if (leg.isAirwayExitFix && leg.isCollapsed) {
-            this._cumDistance.set(leg.airwayDistance ?? -1);
-        } else if (leg.legDefinition.leg.type === LegType.HF || leg.legDefinition.leg.type === LegType.HM || leg.legDefinition.leg.type === LegType.HA) {
-            const lastVectorIndex = leg.legDefinition.calculated?.flightPath.length ? leg.legDefinition.calculated?.flightPath.length - 1 : 0;
-            this._cumDistance.set(leg.legDefinition.calculated?.flightPath[lastVectorIndex].distance ?? 0);
-        } else {
-            this._cumDistance.set(leg.legDefinition.calculated?.cumulativeDistanceWithTransitions ?? 0);
-        }
-    }
 
     /**
      * Resets highlight animation when the leg goes to/from active so the right color variable is used.
@@ -242,21 +261,23 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
     public onAfterRender(node: VNode): void {
         super.onAfterRender(node);
 
-        console.log("onAfterRender called from FixInfoWide");
-
         this.props.data.sub((v) => {
             if (v.isActive) {
                 this._dtk.set(this.props.getActiveLegDtk());
+                this._brg.set(this.activeLegBearing.get());
             } else if (v.isAirwayExitFix && v.isCollapsed) {
                 this._dtk.set(-1);
+                this._brg.set(-1);
             } else if (v.legDefinition.leg.type === LegType.HF || v.legDefinition.leg.type === LegType.HM || v.legDefinition.leg.type === LegType.HA) {
                 this._dtk.set(v.legDefinition.leg.course);
+                this._brg.set(v.legDefinition.leg.course);
             } else {
                 this._dtk.set(v.legDefinition.calculated?.initialDtk ?? -1);
+                this._brg.set(v.legDefinition.calculated?.initialDtk ?? -1);
             }
             const altitude = Math.round(UnitType.METER.convertTo(v.invalidConstraintAltitude ?? v.targetAltitude ?? -1, UnitType.FOOT));
 
-            this.setDistance(v);
+            // this.setCumDistance(v);
 
             if (v.isActive) {
                 this.fixElementRef.instance.classList.add(this.ACTIVE_WPT_CLASS);
@@ -378,17 +399,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         this.highlightElementRef.instance.classList.remove(UiControl.FOCUS_CLASS);
     }
 
-    protected renderETA(): VNode {
-        return (
-            <TimeDisplay
-                ref={this.etaRef}
-                time={this.eta}
-                format={TimeDisplayFormat.UTC}
-                localOffset={0}
-            />
-        );
-    }
-
     /** @inheritdoc */
     render(): VNode {
         return (
@@ -397,14 +407,14 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 <G1000UiControl onFocused={this.onNameFocused.bind(this)}
                                 onBlurred={this.onNameBlurred.bind(this)}>
                     <div class='fix-name'>
-                        <span ref={this.highlightElementRef}>{this.props.data.get().legDefinition.name}<span className='fix-type'>{this._fixType}</span></span>
+                        <span ref={this.highlightElementRef}>{this.props.data.get().legDefinition.name}<span class='fix-type'>{this._fixType}</span></span>
                     </div>
                 </G1000UiControl>
                 <div class='mfd-dtk-value'>
                     {this._dtk}°
                 </div>
                 <div class='mfd-dis-value'>
-                    {this._cumDistance}
+                    {this._cumulativeDistance}
                     <span class="smallText">
                         NM
                     </span>
@@ -429,7 +439,19 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                     {this._ete}
                 </div>
                 <div class='mfd-eta-value'>
-                    {this.renderETA()}
+                    {this._eta}
+                    <span class="smallText">
+                        LCL
+                    </span>
+                </div>
+                <div class='mfd-eta-value'>
+                    {this._eta}
+                    <span class="smallText">
+                        LCL
+                    </span>
+                </div>
+                <div class='mfd-brg-value'>
+                    {this._brg}°
                 </div>
             </div>
         );

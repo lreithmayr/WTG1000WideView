@@ -72,7 +72,6 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
 
     protected override renderItem(data: FlightPlanSegment, index: number): VNode {
         let section;
-        console.log("From own renderItem()");
         const fplSectionRef = FSComponent.createRef<FPLSection>()
         switch (data.segmentType) {
             case FlightPlanSegmentType.Departure:
@@ -99,6 +98,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 section = (
                     <FPLWideArrival
                         ref={fplSectionRef}
+                        bus={this.props.bus}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -118,6 +118,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 section = (
                     <FPLWideApproach
                         ref={fplSectionRef}
+                        bus={this.props.bus}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -137,6 +138,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 section = (
                     <FPLWideDestination
                         ref={fplSectionRef}
+                        bus={this.props.bus}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -156,6 +158,7 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                 section = (
                     <FPLWideEnroute
                         ref={fplSectionRef}
+                        bus={this.props.bus}
                         viewService={this.props.viewService}
                         fms={this.props.fms}
                         detailsController={this.controller}
@@ -193,26 +196,26 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
                                 <tbody>
                                 <tr>
                                     <td><span id="wide-dtk"
-                                              className="smallText white">DTK</span></td>
+                                              class="smallText white">DTK</span></td>
                                     <td><span id="wide-cum-dis"
-                                              className="smallText white">CUM DIS</span></td>
+                                              class="smallText white">CUM DIS</span></td>
                                     <td><span id="wide-alt"
-                                              className="smallText white">ALT</span></td>
+                                              class="smallText white">ALT</span></td>
                                     <td><span id="wide-fuel-rem"
-                                              className="smallText white">Fuel REM</span></td>
+                                              class="smallText white">Fuel REM</span></td>
                                     <td><span id="wide-cum-ete"
-                                              className="smallText white">CUM ETE</span></td>
+                                              class="smallText white">CUM ETE</span></td>
                                     <td><span id="wide-eta"
-                                              className="smallText white">ETA</span></td>
+                                              class="smallText white">ETA</span></td>
                                     <td><span id="wide-brg"
-                                              className="smallText white">BRG</span></td>
+                                              class="smallText white">BRG</span></td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
                         <hr class="mfd-flightplan-wide-hr"/>
                         <div class='mfd-fpln-wide-container'
-                             style={"height:200px"}
+                             style={"height:190px"}
                              ref={this.fplnContainer}>
                             <G1000ControlList
                                 ref={this.sectionListRef}
