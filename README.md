@@ -23,28 +23,52 @@ exports.FPLEnroute = FPLEnroute;
 #### MFDUiPage
 
 ```typescript
-    class MFDUiPage extends UiPage {
-        constructor() {
-            super(...arguments);
-            this.isSoftkeyMenuHidden = false;
+class MFDUiPage extends UiPage {
+    constructor() {
+        super(...arguments);
+        this.isSoftkeyMenuHidden = false;
+    }
+
+    [...]
+
+    // Patch applied here to store the selected FPL view style
+    /**
+     * This method is called when a FPL button event occurs.
+     * @returns whether the event was handled.
+     */
+    onFPLPressed() {
+        if (window.fplWideViewActive) {
+            this.props.viewService.open('FPLWidePage');
+        } else {
+            this.props.viewService.open('FPLPage');
         }
+        return true;
+    }
 
+    [...]
+}
+```
+
+#### MFDSelectDepArr
+
+```typescript
+class MFDSelectDepArr extends SelectDepArr {
+    constructor() {
+        super(...arguments);
         [...]
-
-        // Patch applied here to store the selected FPL view style
-        /**
-         * This method is called when a FPL button event occurs.
-         * @returns whether the event was handled.
-         */
-        onFPLPressed() {
-            if (window.fplWideViewActive) {
-                this.props.viewService.open('FPLWidePage');
-            } else {
-                this.props.viewService.open('FPLPage');
-            }
-            return true;
+    }
+    
+    [...]
+    
+    /**
+     * A callback which is called when the Load action is executed.
+     */
+    onLoadSelected() {
+        this.controller.onLoadSelected();
+        if (window.fplWideViewActive) {
+            this.props.viewService.open('FPLWidePage');
+        } else {
+            this.props.viewService.open('FPLPage');
         }
-
-        [...]
     }
 ```
