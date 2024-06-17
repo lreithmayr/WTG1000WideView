@@ -45,12 +45,13 @@ export class WTG1000WideViewPlugin extends G1000AvionicsPlugin<G1000MfdPluginBin
             <MFDFPLWidePage viewService={this.binder.viewService}
                             fms={this.binder.fms}
                             bus={this.binder.bus}
+                            tas={this.tas}
                             menuSystem={this.binder.menuSystem}/>
         );
     }
 
     public onComponentCreating = (constructor: DisplayComponentFactory<any>, props: any): DisplayComponent<any> | undefined => {
-        if (constructor.name === 'MFDUiPage') {
+        if (constructor.name === 'MFDNavMapPage') {
             return new MFDNavMapWidePage({
                 bus: this.binder.bus,
                 viewService: this.binder.viewService,

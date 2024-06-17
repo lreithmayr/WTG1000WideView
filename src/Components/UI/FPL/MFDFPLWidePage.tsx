@@ -22,7 +22,8 @@ import {
     MapRangeController,
     TrafficUserSettings,
     UnitsUserSettings,
-    MapOrientation
+    MapOrientation,
+    TrafficAdvisorySystem
 } from '@microsoft/msfs-garminsdk';
 
 import {
@@ -49,7 +50,7 @@ export interface MFDFPLWidePageProps extends MFDUiPageProps {
     fms: Fms;
 
     /** The G1000 traffic advisory system. */
-    // tas: TrafficAdvisorySystem;
+    tas: TrafficAdvisorySystem;
 }
 
 /**
