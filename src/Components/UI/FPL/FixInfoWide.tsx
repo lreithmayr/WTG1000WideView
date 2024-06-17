@@ -90,7 +90,14 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
 
     private _cumulativeDistance = MappedSubject.create(
         ([leg, currentLNavWpt]): string => {
-            if (leg.legIsBehind) {
+            if (leg.isAirwayExitFix) {
+                console.log(`====\n${leg.legDefinition.name}\n====`);
+            }
+            if (leg.legIsBehind || (leg.legDefinition.calculated?.distance ?? -1) < 0.1) {
+                if (leg.isActive || leg.legDefinition.name === currentLNavWpt) {
+                    window.legCumulativeDist = UnitType.METER.convertTo(this.props.getActiveLegDistance(), UnitType.NMILE);
+                    return '____';
+                }
                 return '____';
             } else {
                 if (leg.isActive || leg.legDefinition.name === currentLNavWpt) {
@@ -99,7 +106,7 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                     window.legCumulativeDist += UnitType.METER.convertTo(leg.airwayDistance ?? -1, UnitType.NMILE);
                 } else if (leg.legDefinition.leg.type === LegType.HF || leg.legDefinition.leg.type === LegType.HM || leg.legDefinition.leg.type === LegType.HA) {
                     const lastVectorIndex = leg.legDefinition.calculated?.flightPath.length ? leg.legDefinition.calculated?.flightPath.length - 1 : 0;
-                    window.legCumulativeDist += leg.legDefinition.calculated?.flightPath[lastVectorIndex].distance ?? 0;
+                    window.legCumulativeDist += UnitType.METER.convertTo(leg.legDefinition.calculated?.flightPath[lastVectorIndex].distance ?? 0, UnitType.NMILE);
                 } else {
                     window.legCumulativeDist += UnitType.METER.convertTo((leg.legDefinition.calculated?.distance ?? -1), UnitType.NMILE);
                 }
