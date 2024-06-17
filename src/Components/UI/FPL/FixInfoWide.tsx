@@ -90,9 +90,6 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
 
     private _cumulativeDistance = MappedSubject.create(
         ([leg, currentLNavWpt]): string => {
-            if (leg.isAirwayExitFix) {
-                console.log(`====\n${leg.legDefinition.name}\n====`);
-            }
             if (leg.legIsBehind || (leg.legDefinition.calculated?.distance ?? -1) < 0.1) {
                 if (leg.isActive || leg.legDefinition.name === currentLNavWpt) {
                     window.legCumulativeDist = UnitType.METER.convertTo(this.props.getActiveLegDistance(), UnitType.NMILE);
@@ -142,6 +139,9 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                 let end = fuelRem / UnitType.GPH_FUEL.convertTo(this.fuelFlowGPH.get(), UnitType.PPH)
                 let endMINS = ((end % 1) * 60).toFixed(0).padStart(2, '0');
                 let endHRS = end.toString().split('.')[0];
+                if (end < 0) {
+                    return '0' + '+' + '00'
+                }
                 return endHRS + '+' + endMINS;
             } else {
                 return '_____';

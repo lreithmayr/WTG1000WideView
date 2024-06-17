@@ -3,5 +3,6 @@
 
 declare global {
     var legCumulativeDist: number = 0.0;
+    var fplWideViewActive: boolean = false;
 }
 export {};

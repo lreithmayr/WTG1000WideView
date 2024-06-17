@@ -52,6 +52,16 @@
     height: 270px;
 }
 
+.mfd-fpln-container {
+    position: relative;
+    margin-top: 30px;
+    width: 400px;
+    height: 150px;
+    font-size: 20px;
+    font-family: Roboto-Bold;
+    overflow: hidden;
+}
+
 .mfd-fpln-wide-container {
     position: absolute;
     top: 69px;
@@ -124,6 +134,14 @@
 
 .fix-hold {
     color: grey;
+}
+
+#origDest {
+    left: 40px;
+    position: relative;
+    padding: 2px;
+    font-size: 20px;
+    font-family: Roboto-Bold;
 }
 
 #origDestWide {
@@ -217,8 +235,8 @@
 .mfd-fuelrem-value {
     position: absolute;
     left: 380px;
-    width: 100px;
-    text-align: right;
+    width: 120px;
+    text-align: center;
     overflow: hidden;
     color: whitesmoke;
 }
