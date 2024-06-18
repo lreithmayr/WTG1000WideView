@@ -31,6 +31,7 @@ export class WTG1000WideViewPlugin extends G1000AvionicsPlugin<G1000MfdPluginBin
         this.loadCss('coui://html_ui/Mods/WTG1000WideViewPlugin.css').then(() => {
             console.log("CSS loaded");
         });
+        this.tas.init();
     }
 
     public onMenuSystemInitialized(): void {
