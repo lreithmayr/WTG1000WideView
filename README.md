@@ -6,6 +6,15 @@
 ![img.png](img.png)
 
 ### Patches to MFD_FSR.js:
+
+For the plugin to function correctly, some adjustments to the compiled JavaScript code in MFD_FSR.js need to be made. 
+
+The file is located here: 
+
+```
+[...]\Microsoft Flight Simulator\Packages\Official\Steam\fsreborn-aircraft-fsr500\html_ui\Pages\VCockpit\Instruments\Generic\FSRGarmin\FSR1000\MFD\MFD_FSR.js
+```
+
 #### Additional exports:
 
 ```typescript
