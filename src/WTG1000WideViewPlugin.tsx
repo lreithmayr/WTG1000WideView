@@ -4,6 +4,7 @@ import {
     DisplayComponentFactory,
     FSComponent,
     registerPlugin,
+    Subject,
     TrafficInstrument
 } from '@microsoft/msfs-sdk';
 import {
@@ -32,6 +33,7 @@ export class WTG1000WideViewPlugin extends G1000AvionicsPlugin<G1000MfdPluginBin
             console.log("CSS loaded");
         });
         this.tas.init();
+        window.legLegModeSubject = Subject.create<boolean>(false);
     }
 
     public onMenuSystemInitialized(): void {

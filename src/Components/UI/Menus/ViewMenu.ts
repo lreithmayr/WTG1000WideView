@@ -21,9 +21,11 @@ export class ViewMenu extends SoftKeyMenu {
             this.activateNarrowView();
         }, true, false);
         this.addItem(7, 'Leg-Leg', () => {
-        }, false, true);
+            this.activateLegLegMode();
+        }, false, false);
         this.addItem(8, 'CUM', () => {
-        }, false, true);
+            this.activateCumMode();
+        }, true, false);
         this.addItem(10, 'Back', () => menuSystem.back());
     }
     private activateWideView() {
@@ -36,6 +38,18 @@ export class ViewMenu extends SoftKeyMenu {
         this.getItem(4).value.set(true);
         this.getItem(5).value.set(false);
         window.fplWideViewActive = true;
+    }
+
+    private activateLegLegMode(): void {
+        this.getItem(7).value.set(true);
+        this.getItem(8).value.set(false);
+        window.legLegModeSubject.set(true);
+    }
+
+    private activateCumMode(): void {
+        this.getItem(7).value.set(false);
+        this.getItem(8).value.set(true);
+        window.legLegModeSubject.set(false);
     }
 
     private activateNarrowView() {

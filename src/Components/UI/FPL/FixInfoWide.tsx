@@ -114,6 +114,38 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
         this.currentLNavWpt
     );
 
+    private _legDistance = MappedSubject.create(
+        ([leg, currentLNavWpt]): string => {
+            if (leg.legIsBehind || (leg.legDefinition.calculated?.distance ?? -1) < 0.1) {
+                return '____';
+            } else {
+                let legDist: number;
+                if (leg.isActive || leg.legDefinition.name === currentLNavWpt) {
+                    legDist = UnitType.METER.convertTo(this.props.getActiveLegDistance(), UnitType.NMILE);
+                } else if (leg.isAirwayExitFix && leg.isCollapsed) {
+                    legDist = UnitType.METER.convertTo(leg.airwayDistance ?? -1, UnitType.NMILE);
+                } else if (leg.legDefinition.leg.type === LegType.HF || leg.legDefinition.leg.type === LegType.HM || leg.legDefinition.leg.type === LegType.HA) {
+                    const lastVectorIndex = leg.legDefinition.calculated?.flightPath.length ? leg.legDefinition.calculated?.flightPath.length - 1 : 0;
+                    legDist = UnitType.METER.convertTo(leg.legDefinition.calculated?.flightPath[lastVectorIndex].distance ?? 0, UnitType.NMILE);
+                } else {
+                    legDist = UnitType.METER.convertTo(leg.legDefinition.calculated?.distance ?? -1, UnitType.NMILE);
+                }
+                return legDist.toFixed((legDist < 100) ? 1 : 0);
+            }
+        },
+        this.props.data,
+        this.currentLNavWpt
+    );
+
+    private _displayDistance = MappedSubject.create(
+        ([cumDist, legDist, isLegLeg]): string => {
+            return isLegLeg ? legDist : cumDist;
+        },
+        this._cumulativeDistance,
+        this._legDistance,
+        window.legLegModeSubject
+    );
+
 
     private _fuelRemLBS = MappedSubject.create(
         ([gsKTS, fuelFlowGPH, totalFuelGAL, dist]): string => {
@@ -170,7 +202,7 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
             }
         },
         this.gsKTS,
-        this._cumulativeDistance
+        this._displayDistance
     );
 
     private _eta = MappedSubject.create(
@@ -421,7 +453,7 @@ export class FixInfoWide extends G1000UiControl<FixInfoWideProps> {
                     {this._dtk}°
                 </div>
                 <div class='mfd-dis-value'>
-                    {this._cumulativeDistance}
+                    {this._displayDistance}
                     <span class="smallText">
                         NM
                     </span>

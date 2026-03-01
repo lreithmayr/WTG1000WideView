@@ -54,6 +54,22 @@ export class MFDFPLWideDetails extends FPLDetails<MFDFPLWideDetailProps> {
         super(props);
     }
 
+    /** @inheritdoc */
+    public onAfterRender(node: VNode): void {
+        super.onAfterRender(node);
+
+        window.legLegModeSubject.sub((isLegLeg) => {
+            const disLabel = document.getElementById('wide-cum-dis');
+            const eteLabel = document.getElementById('wide-cum-ete');
+            if (disLabel) {
+                disLabel.textContent = isLegLeg ? 'DIS' : 'CUM DIS';
+            }
+            if (eteLabel) {
+                eteLabel.textContent = isLegLeg ? 'ETE' : 'CUM ETE';
+            }
+        }, true);
+    }
+
     /** Called when the fpl view is opened. */
     public fplViewOpened(): void {
         super.fplViewOpened(false);
